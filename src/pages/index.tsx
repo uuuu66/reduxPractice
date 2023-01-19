@@ -117,20 +117,6 @@ export default function Home() {
             </p>
           </a>
         </div>
-        <form action="/examples/media/action_target.php" method="get">
-          학과 : <input type="text" name="st_department" list="depList" />
-          <br />
-          이름 : <input type="text" name="st_name" />
-          <br />
-          <br />
-          <datalist id="depList">
-            <option value="컴퓨터공학과"></option>
-            <option value="영어영문과"></option>
-            <option value="경영학과"></option>
-            <option value="사회체육과"></option>
-          </datalist>
-          <button type="submit">제출하기</button>
-        </form>
       </main>
     </>
   );
