@@ -1,7 +1,7 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { within, userEvent } from "@storybook/testing-library";
-import { TestComponent } from "./TestComponent";
+import TestComponent from "./TestComponent";
 
 export default {
   title: "Example/TestComponent",
