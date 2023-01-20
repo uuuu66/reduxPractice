@@ -2,10 +2,19 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
 import styles from "styles/Home.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import wrapper, { AppDispatch, RootState } from "redux_mango/store";
+import { useCallback } from "react";
+import { requestMessage } from "redux_mango/slice/helloSlice";
+import axios from "axios";
+import { hello } from "apis/hello";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { message } = useSelector((state: RootState) => state.hello);
+  hello();
   return (
     <>
       <Head>
@@ -38,8 +47,10 @@ export default function Home() {
             </a>
           </div>
         </div>
-
-        <div className={styles.center}>
+        <button onClick={() => dispatch(requestMessage())} type="button">
+          ssss
+        </button>
+        <div className={styles.center} style={{ cursor: "pointer" }}>
           <Image
             className={styles.logo}
             src="/next.svg"
@@ -116,6 +127,7 @@ export default function Home() {
               with&nbsp;Vercel.
             </p>
           </a>
+          {message}
         </div>
       </main>
     </>
