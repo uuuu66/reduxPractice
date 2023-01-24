@@ -14,7 +14,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore();
 
-export const wrapper = createWrapper<Store>(createStore);
+const wrapper = createWrapper<Store>(createStore);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

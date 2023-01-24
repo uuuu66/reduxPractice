@@ -17,9 +17,9 @@ const rootReducer = (
       const combinedReducer = combineReducers({
         hello: helloSlice,
       });
+
       return combinedReducer(state, action);
     }
   }
 };
-
 export default rootReducer;
