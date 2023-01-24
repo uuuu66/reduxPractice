@@ -1,3 +1,6 @@
+import UserAge from "components/User/UserAge";
+import UserName from "components/User/UserName";
+import useShallowSelector from "hooks/useShallowSelector";
 import React from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { RootState } from "redux/store";
@@ -7,7 +10,7 @@ interface Props {}
 
 const Saga: React.FC<Props> = () => {
   const dispatch = useDispatch();
-  const isLoading = useSelector((root: RootState) => root.loading.isLoading);
+  const isLoading = useShallowSelector((root) => root.user.age);
   const { name } = useSelector((root: RootState) => root.user, shallowEqual);
 
   const handleButtonClick = () => {
@@ -20,8 +23,8 @@ const Saga: React.FC<Props> = () => {
     <div>
       <div>
         <div>로딩: {isLoading ? "로딩 중" : "로딩 끝"}</div>
-        <button onClick={handleButtonClick}>{name}</button>
-        <button onClick={handleTestClick}>test</button>
+        <UserName />
+        <UserAge />
       </div>
     </div>
   );
