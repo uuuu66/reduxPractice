@@ -2,7 +2,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { getUserInfo } from "pages/api/user";
 import { put, call, takeLatest, delay } from "redux-saga/effects";
 import { endLoading, startLoading } from "redux/loading/loadingSlice";
-import { getUserApi, IUserState, setUser, test } from "redux/user/userSlice";
+import { getUserApi, IUserState, setUser } from "redux/user/userSlice";
 
 function* getUserInfoAction(action: PayloadAction<any, any>) {
   try {
