@@ -26,6 +26,6 @@ export default function handler(
  * 유저정보 get
  */
 export const getUserInfo = async () => {
-  const data = await api.get("api/user");
-  console.log(data);
+  const { data } = await api.get("api/user");
+  return data;
 };

@@ -1,27 +1,23 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { ServerResponse } from "http";
 import { getUserInfo } from "pages/api/user";
-import {
-  all,
-  fork,
-  put,
-  call,
-  takeLatest,
-  takeEvery,
-} from "redux-saga/effects";
-import { getUser, setUser } from "redux/user/userSlice";
+import { put, call, takeLatest, delay } from "redux-saga/effects";
+import { endLoading, startLoading } from "redux/loading/loadingSlice";
+import { getUserApi, IUserState, setUser, test } from "redux/user/userSlice";
 
 function* getUserInfoAction(action: PayloadAction<any, any>) {
   try {
-    console.log("g");
     // api 통신할때는 call
-    const result: ServerResponse = yield call(getUserInfo);
-    yield console.log(result);
+    yield put(startLoading());
+    yield delay(2000);
+    const result: IUserState = yield call(getUserInfo);
+    yield put(setUser(result));
   } catch (err) {
     yield console.log(err);
+  } finally {
+    yield put(endLoading());
   }
 }
 
 export function* animalSaga() {
-  yield takeEvery(getUser, getUserInfoAction);
+  yield takeLatest(getUserApi, getUserInfoAction);
 }

@@ -34,15 +34,18 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<IUserState>) => {
-      state = action.payload;
+      return action.payload;
     },
-    getUser: () => {},
+    getUserApi: () => {},
+    test: (state) => {
+      return { name: "s", address: "d", age: 1, phone: "no" };
+    },
   },
 });
 
 /**
  * 리듀서
  */
-export const { setUser, getUser } = userSlice.actions;
+export const { setUser, getUserApi, test } = userSlice.actions;
 
 export default userSlice.reducer;

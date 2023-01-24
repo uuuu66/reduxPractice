@@ -10,16 +10,15 @@ const createStore = () => {
   const store = configureStore({
     reducer: rootReducer as Reducer<IState, AnyAction>,
     middleware: [sagaMiddleware],
+    devTools: true,
   });
   return store;
 };
-
-const store = createStore();
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export const store = createStore();
+sagaMiddleware.run(rootSaga);
 
 const wrapper = createWrapper<Store<IState>>(createStore);
 
-sagaMiddleware.run(rootSaga);
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 export default wrapper;

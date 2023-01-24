@@ -1,17 +1,15 @@
 import "styles/globals.css";
 import type { AppProps } from "next/app";
-import createSagaMiddleware from "redux-saga";
-import wrapper from "redux/store";
-// import { configureStore, applyMiddleware } from "@reduxjs/toolkit";
+import wrapper, { store } from "redux/store";
+import { Provider } from "react-redux";
 
-// const sagaMiddleware = createSagaMiddleware();
-// // 스토어에 mount 합니다.
-// const store = configureStore(reducer, applyMiddleware(sagaMiddleware));
-
-// // 그리고 saga를 실행합니다.
-// sagaMiddleware.run(mySaga);
+const reduxStore = store;
 
 function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <Provider store={reduxStore}>
+      <Component {...pageProps} />
+    </Provider>
+  );
 }
 export default wrapper.withRedux(App);
