@@ -18,8 +18,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/components": ["./src/components/*"]
-    }
+    },
+    "typeRoots": ["./src/custom.d.ts"]
   },
-  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["src", "src/custom.d.ts", "next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }
