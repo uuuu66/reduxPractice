@@ -1,16 +1,15 @@
 import "styles/globals.css";
 import type { AppProps } from "next/app";
-import wrapper from "redux_mango/store";
+import wrapper, { store } from "redux_mango/store";
 import { Provider } from "react-redux";
 
-function App({ Component, ...rest }: AppProps) {
-  const { store, props } = wrapper.useWrappedStore(rest);
-  const { pageProps } = props;
+const reduxStore = store;
 
+function App({ Component, pageProps }: AppProps) {
   return (
-    <Provider store={store}>
+    <Provider store={reduxStore}>
       <Component {...pageProps} />
     </Provider>
   );
 }
-export default App;
+export default wrapper.withRedux(App);

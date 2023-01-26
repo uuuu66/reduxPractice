@@ -12,11 +12,11 @@ export const createStore = () =>
 
 const sagaMiddleware = createSagaMiddleware();
 
-const store = createStore();
-
-const wrapper = createWrapper<Store>(createStore);
-export type RootState = ReturnType<typeof store.getState>;
+export const store = createStore();
+sagaMiddleware.run(rootSaga);
+export type AppStore = ReturnType<typeof createStore>;
+export type RootState = ReturnType<AppStore["getState"]>;
+const wrapper = createWrapper<AppStore>(createStore);
 export type AppDispatch = typeof store.dispatch;
 
-sagaMiddleware.run(rootSaga);
 export default wrapper;
