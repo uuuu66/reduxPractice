@@ -58,7 +58,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
     for (let i = 0; i < columns.length; i++) {
       const isNowTarget = columns[i].index === targetIndex;
       colgroupList.push(
-        <col key={columns[i].key} width={columns[i].width}></col>
+        <col key={columns[i].key + "column"} width={columns[i].width}></col>
       );
       theadList.push(
         <StyledTh
@@ -81,7 +81,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
               setMouseXy([e.clientX, e.clientY]);
             }
           }}
-          key={columns[i].key + String(i)}
+          key={columns[i].key + String(i) + "th"}
         >
           {columns[i].name}
         </StyledTh>
@@ -101,19 +101,20 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
     for (let i = 0; i < data.length; i++) {
       const item = data[i] as { [key: string]: any };
       const items: JSX.Element[] = [];
+
       for (let j = 0; j < columns.length; j++) {
         const { index, render } = columns[j];
         items.push(
           <StyledTd
             isNowDragged={index === draggingIndex}
             isNowTarget={index === targetIndex}
-            key={index + i}
+            key={item.id + item[index] + "Td"}
           >
             {item[index]}
           </StyledTd>
         );
       }
-      body.push(<tr key={item[tableKey]}>{items}</tr>);
+      body.push(<tr key={item["id"] + "tr"}>{items}</tr>);
     }
     return <tbody>{body}</tbody>;
   };
@@ -135,7 +136,6 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
             </StyledDraggedTh>
           </tr>
         </thead>
-        <tr></tr>
       </StyledDraggedTable>
       <div>
         <table border={1}>

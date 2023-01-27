@@ -14,6 +14,7 @@ interface Data {
   name: string;
   age: number;
   phone: string;
+  id?: number;
 }
 
 const columns: TableColumn[] = [
@@ -36,7 +37,7 @@ const mockData: Data[] = [
 ];
 const data: Data[] = [];
 for (let i = 0; i < 100; i += 1) {
-  data.push(i % 2 === 0 ? mockData[0] : mockData[1]);
+  data.push({ id: i, ...(i % 2 === 0 ? mockData[0] : mockData[1]) });
 }
 
 const Template: ComponentStory<typeof Table> = (args) => (
