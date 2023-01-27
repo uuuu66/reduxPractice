@@ -100,7 +100,7 @@ const Select: React.FC<SelectProps> = ({
           }
         />
 
-        <StyledButton>
+        <div>
           {isHover ? (
             <img src={Wink} />
           ) : !isOpen ? (
@@ -108,7 +108,7 @@ const Select: React.FC<SelectProps> = ({
           ) : (
             <img src={Heart} />
           )}
-        </StyledButton>
+        </div>
       </InputWrapper>
 
       <List
@@ -137,17 +137,7 @@ const Container = styled.div`
   display: flex;
   position: relative;
   flex-direction: column;
-  width: 100%;
-`;
-const StyledButton = styled.div`
-  display: flex;
-  align-items: center;
-  flex: 1 0 0;
-  z-index: 3;
-  outline: 0 none;
-
-  background-color: transparent;
-  cursor: pointer;
+  width: inherit;
 `;
 
 const InputWrapper = styled.div`
@@ -155,20 +145,31 @@ const InputWrapper = styled.div`
   flex-wrap: nowrap;
   border: 1px solid black;
   border-radius: 4px;
+  position: relative;
   z-index: 3;
-  flex: 4 0 0;
   background-color: white;
+  width: inherit;
+  cursor: pointer;
+  div {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    z-index: 3;
+    outline: 0 none;
+    min-height: 32px;
+    background-color: transparent;
+    cursor: pointer;
+    max-width: 20%;
+  }
   input {
+    max-width: 80%;
     outline: none;
     border: none;
-    background-color: cornsilk;
-    border-radius: 5px;
-    min-width: 100px;
-    line-height: 32px;
-    background-color: transparent;
-
-    padding: 4px;
+    font-size: 40px;
     cursor: pointer;
+    flex: 1;
+    padding: 2px 4px;
+    background-color: transparent;
   }
 `;
 const List = styled.ul<{
