@@ -1,5 +1,7 @@
-import React, { ReactNode, useEffect, useState } from "react";
-import styled, { css } from "styled-components";
+
+import React, { ReactNode } from "react";
+import styled from "styled-components";
+import { colors } from "@/styles/colors";
 
 export interface TableColumn {
   key: string | number;
@@ -212,10 +214,12 @@ const Table = <T,>({
         </table>
       </div>
     </>
+
   );
 };
 
 export default Table;
+
 
 const StyledTh = styled.th<{ isNowTarget?: boolean; isNowDragged?: boolean }>`
   cursor: move;
@@ -253,4 +257,5 @@ const StyledDraggedTable = styled.table<{
   top: ${({ mouseXy }) => (mouseXy ? mouseXy[1] || 0 : 0)}px;
   display: ${({ isDragged }) => (isDragged ? "default" : "none")};
   background-color: white;
+
 `;
