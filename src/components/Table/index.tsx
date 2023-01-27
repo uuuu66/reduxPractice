@@ -8,15 +8,27 @@ export interface TableColumn {
   width: number;
   render?: (value: unknown, row: unknown) => ReactNode;
 }
+export interface DragFunctionOptions {
+  newColumns?: TableColumn[];
+  mouseXy?: number[];
+  targetIndex?: string;
+  draggingIndex?: string;
+}
 
 interface Props<T> {
   data: T[];
   columns: TableColumn[];
   tableKey: string;
   setColumns?: (e: TableColumn[]) => void;
-  dragStartFunction: (e?: React.MouseEvent) => void;
-  dragEndFunction?: (e?: MouseEvent) => void;
-  draggingFunction?: (e?: React.MouseEvent) => void;
+  dragStartFunction: (
+    e?: React.MouseEvent,
+    options?: DragFunctionOptions
+  ) => void;
+  dragEndFunction?: (e?: MouseEvent, options?: DragFunctionOptions) => void;
+  draggingFunction?: (
+    e?: React.MouseEvent,
+    options?: DragFunctionOptions
+  ) => void;
 }
 
 const Table = <T,>({
@@ -38,8 +50,6 @@ const Table = <T,>({
 
   const handleMouseUp = (e: MouseEvent) => {
     if (targetIndex !== draggingIndex) {
-      if (dragEndFunction) dragEndFunction(e);
-
       const newColumns = [...nowColumns];
       const nowTargetArrayIndex = newColumns.findIndex(
         (val) => val.index === targetIndex
@@ -56,6 +66,8 @@ const Table = <T,>({
       } else {
         setNowColumns(newColumns);
       }
+      if (dragEndFunction)
+        dragEndFunction(e, { targetIndex, draggingIndex, mouseXy, newColumns });
     }
     setDraggingIndex(undefined);
     setTargetIndex(undefined);
@@ -85,7 +97,13 @@ const Table = <T,>({
               setTargetIndex(columns[i].index);
               setDraggingIndex(columns[i].index);
               setMouseXy([e.clientX, e.clientY]);
-              if (dragStartFunction) dragStartFunction(e);
+              if (dragStartFunction)
+                dragStartFunction(e, {
+                  targetIndex,
+                  draggingIndex,
+                  mouseXy,
+                  newColumns: nowColumns,
+                });
             }
           }}
           onMouseMove={(e) => {
@@ -93,7 +111,13 @@ const Table = <T,>({
             if (isDragging) {
               setTargetIndex(columns[i].index);
               setMouseXy([e.clientX, e.clientY]);
-              if (draggingFunction) draggingFunction(e);
+              if (draggingFunction)
+                draggingFunction(e, {
+                  targetIndex,
+                  draggingIndex,
+                  mouseXy,
+                  newColumns: nowColumns,
+                });
             }
           }}
           key={columns[i].key + String(i) + "th"}
