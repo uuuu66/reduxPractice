@@ -81,7 +81,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
               setMouseXy([e.clientX, e.clientY]);
             }
           }}
-          key={columns[i].key}
+          key={columns[i].key + String(i)}
         >
           {columns[i].name}
         </StyledTh>
@@ -107,7 +107,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
           <StyledTd
             isNowDragged={index === draggingIndex}
             isNowTarget={index === targetIndex}
-            key={index}
+            key={index + i}
           >
             {item[index]}
           </StyledTd>
