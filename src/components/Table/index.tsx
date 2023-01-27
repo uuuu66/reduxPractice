@@ -1,4 +1,6 @@
 import React, { ReactNode } from "react";
+import styled from "styled-components";
+import { colors } from "@/styles/colors";
 
 export interface TableColumn {
   key: string | number;
@@ -48,11 +50,16 @@ const Table = <T,>({ data, columns, tableKey }: Props<T>) => {
   };
   return (
     <div>
-      <table border={1}>
+      <MyTable border={1}>
         {renderHead(columns)}
         {renderBody(data, columns)}
-      </table>
+      </MyTable>
     </div>
   );
 };
 export default Table;
+
+const MyTable = styled.table`
+  border-collapse: collapse;
+  border: 1px solid ${colors.P5};
+`;
