@@ -47,7 +47,61 @@ const Table = <T,>({
   const [mouseXy, setMouseXy] = useState<number[]>(defaultXy);
   const isDragging = draggingIndex !== undefined;
   const isNotEqualTargetIndexAndDraggingIndex = draggingIndex !== targetIndex;
-
+  const handleMouseDownThead = (
+    e: React.MouseEvent,
+    columns: TableColumn[],
+    i: number
+  ) => {
+    if (isDragging) {
+      setTargetIndex(undefined);
+      setDraggingIndex(undefined);
+    } else {
+      setTargetIndex(columns[i].index);
+      setDraggingIndex(columns[i].index);
+      setMouseXy([e.clientX, e.clientY]);
+      if (dragStartFunction)
+        dragStartFunction(e, {
+          targetIndex,
+          draggingIndex,
+          mouseXy,
+          newColumns: nowColumns,
+        });
+    }
+  };
+  const handleMouseMoveThead = (
+    e: React.MouseEvent,
+    columns: TableColumn[],
+    i: number
+  ) => {
+    e.stopPropagation();
+    if (isDragging) {
+      setMouseXy([e.clientX, e.clientY]);
+      const newColumns = [...nowColumns];
+      const nowTargetArrayIndex = newColumns.findIndex(
+        (val) => val.index === columns[i].index
+      );
+      const nowDraggingArrayIndex = newColumns.findIndex(
+        (val) => val.index === draggingIndex
+      );
+      const nowTargetEle = newColumns[nowTargetArrayIndex];
+      const nowDraggingEle = newColumns[nowDraggingArrayIndex];
+      newColumns[nowDraggingArrayIndex] = nowTargetEle;
+      newColumns[nowTargetArrayIndex] = nowDraggingEle;
+      setTargetIndex(columns[i].index);
+      if (setColumns) {
+        setColumns(newColumns);
+      } else {
+        setNowColumns(newColumns);
+      }
+      if (draggingFunction)
+        draggingFunction(e, {
+          targetIndex,
+          draggingIndex,
+          mouseXy,
+          newColumns: nowColumns,
+        });
+    }
+  };
   const handleMouseUp = (e: MouseEvent) => {
     if (targetIndex !== draggingIndex) {
       const newColumns = [...nowColumns];
@@ -90,51 +144,10 @@ const Table = <T,>({
           isNowDragged={draggingIndex === columns[i].index}
           isNowTarget={isNowTarget}
           onMouseDown={(e) => {
-            if (isDragging) {
-              setTargetIndex(undefined);
-              setDraggingIndex(undefined);
-            } else {
-              setTargetIndex(columns[i].index);
-              setDraggingIndex(columns[i].index);
-              setMouseXy([e.clientX, e.clientY]);
-              if (dragStartFunction)
-                dragStartFunction(e, {
-                  targetIndex,
-                  draggingIndex,
-                  mouseXy,
-                  newColumns: nowColumns,
-                });
-            }
+            handleMouseDownThead(e, columns, i);
           }}
           onMouseMove={(e) => {
-            e.stopPropagation();
-            if (isDragging) {
-              setMouseXy([e.clientX, e.clientY]);
-              const newColumns = [...nowColumns];
-              const nowTargetArrayIndex = newColumns.findIndex(
-                (val) => val.index === columns[i].index
-              );
-              const nowDraggingArrayIndex = newColumns.findIndex(
-                (val) => val.index === draggingIndex
-              );
-              const nowTargetEle = newColumns[nowTargetArrayIndex];
-              const nowDraggingEle = newColumns[nowDraggingArrayIndex];
-              newColumns[nowDraggingArrayIndex] = nowTargetEle;
-              newColumns[nowTargetArrayIndex] = nowDraggingEle;
-              setTargetIndex(columns[i].index);
-              if (setColumns) {
-                setColumns(newColumns);
-              } else {
-                setNowColumns(newColumns);
-              }
-              if (draggingFunction)
-                draggingFunction(e, {
-                  targetIndex,
-                  draggingIndex,
-                  mouseXy,
-                  newColumns: nowColumns,
-                });
-            }
+            handleMouseMoveThead(e, columns, i);
           }}
           key={columns[i].key + String(i) + "th"}
         >
