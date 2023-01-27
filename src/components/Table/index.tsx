@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import styled from "styled-components";
+import { colors } from "@/styles/colors";
 
 export interface TableColumn {
   key: string | number;
@@ -60,5 +61,5 @@ export default Table;
 
 const MyTable = styled.table`
   border-collapse: collapse;
-  border: 1px solid black;
+  border: 1px solid ${colors.P5};
 `;
