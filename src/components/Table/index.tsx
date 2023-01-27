@@ -14,9 +14,20 @@ interface Props<T> {
   columns: TableColumn[];
   tableKey: string;
   setColumns?: (e: TableColumn[]) => void;
+  dragStartFunction: (e?: React.MouseEvent) => void;
+  dragEndFunction?: (e?: MouseEvent) => void;
+  draggingFunction?: (e?: React.MouseEvent) => void;
 }
 
-const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
+const Table = <T,>({
+  data,
+  columns,
+  tableKey,
+  setColumns,
+  draggingFunction,
+  dragStartFunction,
+  dragEndFunction,
+}: Props<T>) => {
   const defaultXy = [0, 0];
   const [nowColumns, setNowColumns] = useState<TableColumn[]>([...columns]);
   const [draggingIndex, setDraggingIndex] = useState<string>();
@@ -25,8 +36,10 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
   const isDragging = draggingIndex !== undefined;
   const isNotEqualTargetIndexAndDraggingIndex = draggingIndex !== targetIndex;
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: MouseEvent) => {
     if (targetIndex !== draggingIndex) {
+      if (dragEndFunction) dragEndFunction(e);
+
       const newColumns = [...nowColumns];
       const nowTargetArrayIndex = newColumns.findIndex(
         (val) => val.index === targetIndex
@@ -72,6 +85,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
               setTargetIndex(columns[i].index);
               setDraggingIndex(columns[i].index);
               setMouseXy([e.clientX, e.clientY]);
+              if (dragStartFunction) dragStartFunction(e);
             }
           }}
           onMouseMove={(e) => {
@@ -79,6 +93,7 @@ const Table = <T,>({ data, columns, tableKey, setColumns }: Props<T>) => {
             if (isDragging) {
               setTargetIndex(columns[i].index);
               setMouseXy([e.clientX, e.clientY]);
+              if (draggingFunction) draggingFunction(e);
             }
           }}
           key={columns[i].key + String(i) + "th"}
