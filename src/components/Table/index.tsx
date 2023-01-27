@@ -109,8 +109,24 @@ const Table = <T,>({
           onMouseMove={(e) => {
             e.stopPropagation();
             if (isDragging) {
-              setTargetIndex(columns[i].index);
               setMouseXy([e.clientX, e.clientY]);
+              const newColumns = [...nowColumns];
+              const nowTargetArrayIndex = newColumns.findIndex(
+                (val) => val.index === columns[i].index
+              );
+              const nowDraggingArrayIndex = newColumns.findIndex(
+                (val) => val.index === draggingIndex
+              );
+              const nowTargetEle = newColumns[nowTargetArrayIndex];
+              const nowDraggingEle = newColumns[nowDraggingArrayIndex];
+              newColumns[nowDraggingArrayIndex] = nowTargetEle;
+              newColumns[nowTargetArrayIndex] = nowDraggingEle;
+              setTargetIndex(columns[i].index);
+              if (setColumns) {
+                setColumns(newColumns);
+              } else {
+                setNowColumns(newColumns);
+              }
               if (draggingFunction)
                 draggingFunction(e, {
                   targetIndex,
@@ -195,12 +211,10 @@ const StyledTh = styled.th<{ isNowTarget?: boolean; isNowDragged?: boolean }>`
   -khtml-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  ${({ isNowTarget, isNowDragged }) =>
-    isNowTarget ? nowTargetCss : isNowDragged ? nowDraggenCss : ""}
+  ${({ isNowTarget, isNowDragged }) => (isNowDragged ? nowDraggenCss : "")}
 `;
 const StyledTd = styled.td<{ isNowTarget?: boolean; isNowDragged?: boolean }>`
-  ${({ isNowTarget, isNowDragged }) =>
-    isNowTarget ? nowTargetCss : isNowDragged ? nowDraggenCss : ""}
+  ${({ isNowTarget, isNowDragged }) => (isNowDragged ? nowDraggenCss : "")}
 `;
 const nowTargetCss = css`
   border-right: 2px dotted red;
