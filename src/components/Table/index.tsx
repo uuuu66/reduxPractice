@@ -87,25 +87,45 @@ const Table = <T,>({
 
   const [mouseXy, setMouseXy] = useState<number[]>(defaultXy);
 
-  let element = null;
-  let clickPosX = 0;
-  let event;
-
+  let clickResizePosX = -1;
+  let clickResizeIndex = -1;
+  let TABLE_COLUMN_MIN_WIDTH = 100;
   // 리사이즈 시작입니당
+
+  /**
+   * 내가 이해하기 위해
+   * 이벤트가 시작이 되면 한번 들어간 state 주소값을 참조하기 때문에 초기 데이터에서 width값만 계속 -, + 된다.
+   * 마우스를 떼서 이벤트를 종료했다가 다시 눌러서 조절하면 그때의 state값이 다시 들어가기 때문에 동작이 잘됨. 이거임
+   */
   const handleMouseMoveResize = (e: MouseEvent) => {
-    console.log(e.pageX);
-  };
-  const handleMouseDownResize = (e: React.MouseEvent) => {
-    clickPosX = e.pageX;
-    console.log(e.pageX);
     e.stopPropagation();
-    document.addEventListener("mousemove", handleMouseMoveResize);
-    const parent = e.currentTarget.parentNode;
-    if (parent) {
-    }
+    const handledWidth = e.pageX - clickResizePosX;
+    const newArray = [...nowColumns];
+    setNowColumns(
+      newArray.map((column, index) => {
+        if (index === clickResizeIndex) {
+          return {
+            ...column,
+            width:
+              column.width + handledWidth <= TABLE_COLUMN_MIN_WIDTH
+                ? TABLE_COLUMN_MIN_WIDTH
+                : column.width + handledWidth,
+          };
+        }
+        return column;
+      })
+    );
   };
-  const handleMouseUpResize = (e: React.MouseEvent) => {
-    console.log(e);
+  const handleMouseDownResize = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    clickResizePosX = e.pageX;
+    clickResizeIndex = index;
+    document.addEventListener("mousemove", handleMouseMoveResize);
+    document.addEventListener("mouseup", handleMouseUpResize);
+  };
+  const handleMouseUpResize = (e: MouseEvent) => {
+    document.removeEventListener("mousemove", handleMouseMoveResize);
+    document.removeEventListener("mouseup", handleMouseUpResize);
   };
   // 리사이즈 여기까징
 
@@ -279,7 +299,6 @@ const Table = <T,>({
           onMouseDown={(e) => {
             handleMouseDownSwitchTh(e, columns, i);
           }}
-          onClick={(e) => console.log(e.currentTarget.offsetWidth)}
           onMouseMove={(e) => {
             handleMouseMoveSwitchTh(e, columns, i);
           }}
@@ -287,10 +306,7 @@ const Table = <T,>({
         >
           {columns[i].name}
           {columns[i].resizable && (
-            <ResizeHandle
-              onMouseDown={handleMouseDownResize}
-              onMouseUp={() => console.log("good")}
-            >
+            <ResizeHandle onMouseDown={(e) => handleMouseDownResize(e, i)}>
               |
             </ResizeHandle>
           )}
@@ -455,6 +471,7 @@ const StyledTh = styled.th<{
   isDraggableCol?: boolean;
   isDragging?: boolean;
 }>`
+  position: relative;
   cursor: ${({ isDraggableCol }) => (!isDraggableCol ? "default" : "move")};
 
   border: 1px solid black;
