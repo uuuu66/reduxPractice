@@ -78,6 +78,7 @@ const Table = <T,>({
   //드래그 관련
   const defaultXy = [0, 0];
   const [nowData, setNowData] = useState<T[]>(data);
+  const [fakeData, setFakeData] = useState<T[]>(data);
   const [nowColumns, setNowColumns] = useState<TableColumn[]>([...columns]);
   const [draggingColIndex, setDraggingHeadIndex] = useState<string>();
   const [targetColIndex, setTargetColIndex] = useState<string>();
@@ -224,23 +225,12 @@ const Table = <T,>({
   const handleMouseUpTbody = (e: MouseEvent) => {
     if (isDraggableRow) {
       if (targetColIndex !== draggingColIndex) {
-        const newData = [...nowData];
-
-        const nowTargetEle = newData[targetRowIndex];
-        const nowDraggingEle = newData[draggingRowIndex];
-        newData[draggingRowIndex] = nowTargetEle;
-        newData[targetRowIndex] = nowDraggingEle;
-        if (setData) {
-          setData(newData);
-        } else {
-          setNowData(newData);
-        }
         if (dragRowEndFunction)
           dragRowEndFunction(e, {
             targetRowIndex,
             draggingRowIndex,
             mouseXy,
-            newData,
+            newData: nowData,
           });
       }
       setDraggingRowIndex(undefined);
@@ -249,6 +239,12 @@ const Table = <T,>({
   };
 
   const handleMouseUp = (e: MouseEvent) => {
+    if (setData) {
+      setData(fakeData);
+    } else {
+      setNowData(fakeData);
+    }
+
     handleMouseUpTh(e);
     handleMouseUpTbody(e);
   };
@@ -317,6 +313,7 @@ const Table = <T,>({
 
       for (let j = 0; j < columns.length; j++) {
         const { index, render } = columns[j];
+
         items.push(
           <StyledTd
             isNowDragged={index === draggingColIndex || i === draggingRowIndex}
@@ -349,28 +346,20 @@ const Table = <T,>({
 
   useEffect(() => {
     const newData = [...nowData];
-    if (targetRowIndex > draggingRowIndex) {
-      const target = newData[draggingRowIndex];
-      let j = draggingRowIndex;
-      while (1) {
-        if (j === targetRowIndex) {
-          newData[j] = target;
-          break;
-        }
-        newData[j] = newData[j + 1];
-        j += 1;
-      }
-    } else if (targetRowIndex < draggingRowIndex) {
-      for (let target = targetRowIndex; target < data.length; target += 1) {
-        newData[target + 1] = _.cloneDeep(nowData[target]);
-      }
-    }
+    if (targetRowIndex)
+      if (targetRowIndex > draggingRowIndex) {
+        const dragEle = newData[draggingRowIndex];
+        const targetEle = newData[targetRowIndex];
 
-    if (setData) {
-      setData(newData);
-    } else {
-      setNowData(newData);
-    }
+        newData[targetRowIndex - 1] = targetEle;
+        newData[targetRowIndex] = dragEle;
+      } else if (targetRowIndex < draggingRowIndex) {
+        for (let target = targetRowIndex; target < data.length; target += 1) {
+          newData[target + 1] = _.cloneDeep(nowData[target]);
+        }
+      }
+
+    setFakeData(newData);
   }, [targetRowIndex]);
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
@@ -418,7 +407,7 @@ const Table = <T,>({
                 {nowColumns.map((val, i) => {
                   const item = data[draggingRowIndex] as { [key: string]: any };
                   const index = val.index;
-                  console.log(item);
+
                   return (
                     <StyledTd key={item.id + item[tableKey] + "dragged+" + i}>
                       {item[index]}
@@ -433,7 +422,7 @@ const Table = <T,>({
       <div>
         <StyledTable>
           {renderHead(nowColumns)}
-          {renderBody(nowData, nowColumns)}
+          {renderBody(isDraggingRow ? fakeData : nowData, nowColumns)}
         </StyledTable>
       </div>
     </>
@@ -460,7 +449,8 @@ const StyledTd = styled.td<{
   isNowDragged?: boolean;
   isDragging?: boolean;
 }>`
-  ${({ isNowDragged }) => (isNowDragged ? nowDraggedCss : "")};
+  ${({ isNowTarget }) => (isNowTarget ? nowDraggedCss : "")};
+
   ${({ isDragging }) => (isDragging ? nowDraggingCss : "")};
 `;
 
