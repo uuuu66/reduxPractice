@@ -18,7 +18,9 @@ interface Data {
 }
 
 const columns: TableColumn[] = [
+
   { key: "name", width: 200, name: "이름", index: "name", resizable: true },
+
   { key: "age", width: 200, name: "나이", index: "age" },
   { key: "phone", width: 200, name: "휴대폰 번호", index: "phone" },
 ];
@@ -36,12 +38,19 @@ const mockData: Data[] = [
   },
 ];
 const data: Data[] = [];
-for (let i = 0; i < 100; i += 1) {
+for (let i = 0; i < 10; i += 1) {
   data.push({ id: i, ...(i % 2 === 0 ? mockData[0] : mockData[1]) });
 }
 
 const Template: ComponentStory<typeof Table> = (args) => (
-  <Table {...args} data={data} columns={columns} tableKey="name" />
+  <Table
+    {...args}
+    isDraggableRow={{ isRenderHandle: true, value: true }}
+    isDraggableCol={false}
+    data={data}
+    columns={columns}
+    tableKey="id"
+  />
 );
 
 export const Primary = Template.bind({});
