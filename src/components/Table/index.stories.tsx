@@ -37,7 +37,7 @@ const mockData: Data[] = [
   },
 ];
 const data: Data[] = [];
-for (let i = 0; i < 100; i += 1) {
+for (let i = 0; i < 10; i += 1) {
   data.push({ id: i, ...(i % 2 === 0 ? mockData[0] : mockData[1]) });
 }
 

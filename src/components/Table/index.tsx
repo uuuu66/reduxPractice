@@ -1,7 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { colors } from "@/styles/colors";
-import _ from "lodash";
 
 export interface TableColumn {
   key: string | number;
@@ -78,7 +77,7 @@ const Table = <T,>({
   //드래그 관련
   const defaultXy = [0, 0];
   const [nowData, setNowData] = useState<T[]>(data);
-  const [fakeData, setFakeData] = useState<T[]>(data);
+
   const [nowColumns, setNowColumns] = useState<TableColumn[]>([...columns]);
   const [draggingColIndex, setDraggingHeadIndex] = useState<string>();
   const [targetColIndex, setTargetColIndex] = useState<string>();
@@ -96,7 +95,7 @@ const Table = <T,>({
     isMoveableRow &&
     (isDraggableRow as IsDraggableRowOptions).isRenderHandle === true;
 
-  const handleMouseDownTh = (
+  const handleMouseDownSwitchTh = (
     e: React.MouseEvent,
     columns: TableColumn[],
     i: number
@@ -118,7 +117,7 @@ const Table = <T,>({
           });
       }
   };
-  const handleMouseMoveTh = (
+  const handleMouseMoveSwitchTh = (
     e: React.MouseEvent,
     columns: TableColumn[],
     i: number
@@ -153,7 +152,7 @@ const Table = <T,>({
           });
       }
   };
-  const handleMouseUpTh = (e: MouseEvent) => {
+  const handleMouseUpSwitchTh = (e: MouseEvent) => {
     if (isDraggableCol) {
       if (targetColIndex !== draggingColIndex) {
         const newColumns = [...nowColumns];
@@ -184,7 +183,7 @@ const Table = <T,>({
       setTargetColIndex(undefined);
     }
   };
-  const handleMouseDownTbody = (e: React.MouseEvent, i: number) => {
+  const handleMouseDownSwitchTbody = (e: React.MouseEvent, i: number) => {
     if (isDraggableRow)
       if (isDraggingRow) {
         setTargetRowIndex(undefined);
@@ -202,7 +201,7 @@ const Table = <T,>({
           });
       }
   };
-  const handleMouseMoveTbody = (
+  const handleMouseMoveSwitchTbody = (
     e: React.MouseEvent,
 
     i: number
@@ -222,7 +221,7 @@ const Table = <T,>({
           });
       }
   };
-  const handleMouseUpTbody = (e: MouseEvent) => {
+  const handleMouseUpSwitchTbody = (e: MouseEvent) => {
     if (isDraggableRow) {
       if (targetColIndex !== draggingColIndex) {
         if (dragRowEndFunction)
@@ -239,14 +238,8 @@ const Table = <T,>({
   };
 
   const handleMouseUp = (e: MouseEvent) => {
-    if (setData) {
-      setData(fakeData);
-    } else {
-      setNowData(fakeData);
-    }
-
-    handleMouseUpTh(e);
-    handleMouseUpTbody(e);
+    handleMouseUpSwitchTh(e);
+    handleMouseUpSwitchTbody(e);
   };
   //헤드 렌더
   const renderHead = (columns: TableColumn[]): JSX.Element => {
@@ -268,10 +261,10 @@ const Table = <T,>({
           isNowDragged={draggingColIndex === columns[i].index}
           isNowTarget={isNowTarget}
           onMouseDown={(e) => {
-            handleMouseDownTh(e, columns, i);
+            handleMouseDownSwitchTh(e, columns, i);
           }}
           onMouseMove={(e) => {
-            handleMouseMoveTh(e, columns, i);
+            handleMouseMoveSwitchTh(e, columns, i);
           }}
           key={columns[i].key + String(i) + "th"}
         >
@@ -298,11 +291,11 @@ const Table = <T,>({
           <StyledDraggedRowHandle
             onMouseDown={(e) => {
               if ((isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-                handleMouseDownTbody(e, i);
+                handleMouseDownSwitchTbody(e, i);
             }}
             onMouseMove={(e) => {
               if ((isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-                handleMouseMoveTbody(e, i);
+                handleMouseMoveSwitchTbody(e, i);
             }}
             style={{ width: "20px" }}
           >
@@ -329,11 +322,11 @@ const Table = <T,>({
         <tr
           onMouseDown={(e) => {
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-              handleMouseDownTbody(e, i);
+              handleMouseDownSwitchTbody(e, i);
           }}
           onMouseMove={(e) => {
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-              handleMouseMoveTbody(e, i);
+              handleMouseMoveSwitchTbody(e, i);
           }}
           key={item["id"] + "tr" + i}
         >
@@ -354,12 +347,9 @@ const Table = <T,>({
         newData[targetRowIndex - 1] = targetEle;
         newData[targetRowIndex] = dragEle;
       } else if (targetRowIndex < draggingRowIndex) {
-        for (let target = targetRowIndex; target < data.length; target += 1) {
-          newData[target + 1] = _.cloneDeep(nowData[target]);
-        }
       }
 
-    setFakeData(newData);
+    setNowData(newData);
   }, [targetRowIndex]);
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
@@ -422,7 +412,7 @@ const Table = <T,>({
       <div>
         <StyledTable>
           {renderHead(nowColumns)}
-          {renderBody(isDraggingRow ? fakeData : nowData, nowColumns)}
+          {renderBody(nowData, nowColumns)}
         </StyledTable>
       </div>
     </>
