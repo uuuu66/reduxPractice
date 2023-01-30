@@ -18,8 +18,9 @@ interface Data {
 }
 
 const columns: TableColumn[] = [
-  { key: "id", width: 200, name: "id", index: "id" },
-  { key: "name", width: 200, name: "이름", index: "name" },
+
+  { key: "name", width: 200, name: "이름", index: "name", resizable: true },
+
   { key: "age", width: 200, name: "나이", index: "age" },
   { key: "phone", width: 200, name: "휴대폰 번호", index: "phone" },
 ];
