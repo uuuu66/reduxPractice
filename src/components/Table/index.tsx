@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { colors } from "@/styles/colors";
 
@@ -8,6 +8,7 @@ export interface TableColumn {
   index: string;
   width: number;
   render?: (value: unknown, row: unknown) => ReactNode;
+  resizable?: boolean;
 }
 export interface DragFunctionOptions {
   newColumns?: TableColumn[];
@@ -47,7 +48,28 @@ const Table = <T,>({
   const [targetIndex, setTargetIndex] = useState<string>();
   const [mouseXy, setMouseXy] = useState<number[]>(defaultXy);
   const isDragging = draggingIndex !== undefined;
+  let element = null;
+  let clickPosX = 0;
+  let event;
   const isNotEqualTargetIndexAndDraggingIndex = draggingIndex !== targetIndex;
+
+  // 리사이즈 시작입니당
+  const handleMouseMoveResize = (e: MouseEvent) => {
+    console.log(e.pageX);
+  };
+  const handleMouseDownResize = (e: React.MouseEvent) => {
+    clickPosX = e.pageX;
+    console.log(e.pageX);
+    e.stopPropagation();
+    document.addEventListener("mousemove", handleMouseMoveResize);
+    const parent = e.currentTarget.parentNode;
+    if (parent) {
+    }
+  };
+  const handleMouseUpResize = (e: React.MouseEvent) => {
+    console.log(e);
+  };
+  // 리사이즈 여기까징
   const handleMouseDownThead = (
     e: React.MouseEvent,
     columns: TableColumn[],
@@ -74,7 +96,6 @@ const Table = <T,>({
     columns: TableColumn[],
     i: number
   ) => {
-    e.stopPropagation();
     if (isDragging) {
       setMouseXy([e.clientX, e.clientY]);
       const newColumns = [...nowColumns];
@@ -127,10 +148,7 @@ const Table = <T,>({
     setDraggingIndex(undefined);
     setTargetIndex(undefined);
   };
-  useEffect(() => {
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => window.removeEventListener("mouseup", handleMouseUp);
-  }, [draggingIndex, targetIndex]);
+
   const renderHead = (columns: TableColumn[]): JSX.Element => {
     const colgroupList: JSX.Element[] = [];
     const theadList: JSX.Element[] = [];
@@ -147,12 +165,21 @@ const Table = <T,>({
           onMouseDown={(e) => {
             handleMouseDownThead(e, columns, i);
           }}
+          onClick={(e) => console.log(e.currentTarget.offsetWidth)}
           onMouseMove={(e) => {
             handleMouseMoveThead(e, columns, i);
           }}
           key={columns[i].key + String(i) + "th"}
         >
           {columns[i].name}
+          {columns[i].resizable && (
+            <ResizeHandle
+              onMouseDown={handleMouseDownResize}
+              onMouseUp={() => console.log("good")}
+            >
+              |
+            </ResizeHandle>
+          )}
         </StyledTh>
       );
     }
@@ -188,37 +215,25 @@ const Table = <T,>({
     return <tbody>{body}</tbody>;
   };
 
+  useEffect(() => {
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => window.removeEventListener("mouseup", handleMouseUp);
+  }, [draggingIndex, targetIndex]);
+
   return (
-    <>
-      <StyledDraggedTable
-        border={1}
-        isDragged={draggingIndex !== undefined}
-        mouseXy={mouseXy}
-      >
-        <colgroup>
-          {[nowColumns.find((val) => val.index === draggingIndex)?.name]}
-        </colgroup>
-        <thead>
-          <tr>
-            <StyledDraggedTh>
-              {nowColumns.find((val) => val.index === draggingIndex)?.name}
-            </StyledDraggedTh>
-          </tr>
-        </thead>
-      </StyledDraggedTable>
-      <div>
-        <table border={1}>
-          {renderHead(nowColumns)}
-          {renderBody(data, nowColumns)}
-        </table>
-      </div>
-    </>
+    <div>
+      <table border={1}>
+        {renderHead(nowColumns)}
+        {renderBody(data, nowColumns)}
+      </table>
+    </div>
   );
 };
 
 export default Table;
 
 const StyledTh = styled.th<{ isNowTarget?: boolean; isNowDragged?: boolean }>`
+  position: relative;
   cursor: move;
   -ms-user-select: none;
   -moz-user-select: -moz-none;
@@ -252,4 +267,13 @@ const StyledDraggedTable = styled.table<{
   top: ${({ mouseXy }) => (mouseXy ? mouseXy[1] || 0 : 0)}px;
   display: ${({ isDragged }) => (isDragged ? "default" : "none")};
   background-color: white;
+`;
+const ResizeHandle = styled.div`
+  width: 20px;
+  position: absolute;
+  right: 20px;
+  top: 2px;
+  background-color: red;
+  cursor: pointer;
+  z-index: 20;
 `;
