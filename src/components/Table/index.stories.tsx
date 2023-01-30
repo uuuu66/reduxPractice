@@ -18,7 +18,6 @@ interface Data {
 }
 
 const columns: TableColumn[] = [
-
   { key: "name", width: 200, name: "이름", index: "name", resizable: true },
 
   { key: "age", width: 200, name: "나이", index: "age" },
@@ -46,7 +45,7 @@ const Template: ComponentStory<typeof Table> = (args) => (
   <Table
     {...args}
     isDraggableRow={{ isRenderHandle: true, value: true }}
-    isDraggableCol={false}
+    isDraggableCol={true}
     data={data}
     columns={columns}
     tableKey="id"

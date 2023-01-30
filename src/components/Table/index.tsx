@@ -90,7 +90,6 @@ const Table = <T,>({
   let element = null;
   let clickPosX = 0;
   let event;
-  const isNotEqualTargetIndexAndDraggingIndex = draggingIndex !== targetIndex;
 
   // 리사이즈 시작입니당
   const handleMouseMoveResize = (e: MouseEvent) => {
@@ -109,7 +108,6 @@ const Table = <T,>({
     console.log(e);
   };
   // 리사이즈 여기까징
- 
 
   const isDraggingCol = draggingColIndex !== undefined;
   const isDraggingRow = draggingRowIndex !== undefined;
@@ -121,7 +119,6 @@ const Table = <T,>({
     (isDraggableRow as IsDraggableRowOptions).isRenderHandle === true;
 
   const handleMouseDownSwitchTh = (
-
     e: React.MouseEvent,
     columns: TableColumn[],
     i: number
@@ -148,7 +145,6 @@ const Table = <T,>({
     columns: TableColumn[],
     i: number
   ) => {
-
     if (isDraggableCol)
       if (isDraggingCol) {
         setMouseXy([e.clientX, e.clientY + 30]);
@@ -176,7 +172,6 @@ const Table = <T,>({
             mouseXy,
             newColumns: nowColumns,
           });
-
       }
   };
   const handleMouseUpSwitchTh = (e: MouseEvent) => {
@@ -233,7 +228,6 @@ const Table = <T,>({
 
     i: number
   ) => {
-    e.stopPropagation();
     if (isDraggableRow)
       if (isDraggingRow) {
         setMouseXy([e.clientX + 30, e.clientY]);
@@ -263,7 +257,6 @@ const Table = <T,>({
       setTargetRowIndex(undefined);
     }
   };
-
 
   const renderHead = (columns: TableColumn[]): JSX.Element => {
     const colgroupList: JSX.Element[] = [];
@@ -368,9 +361,11 @@ const Table = <T,>({
     }
     return <tbody>{body}</tbody>;
   };
-
+  const handleMouseUp = (e: MouseEvent) => {
+    handleMouseUpSwitchTh(e);
+    handleMouseUpSwitchTbody(e);
+  };
   useEffect(() => {
-
     const newData = [...nowData];
     if (targetRowIndex)
       if (targetRowIndex > draggingRowIndex) {
@@ -449,12 +444,10 @@ const Table = <T,>({
         </StyledTable>
       </div>
     </>
-
   );
 };
 
 export default Table;
-
 
 const StyledTh = styled.th<{
   isNowTarget?: boolean;
@@ -468,7 +461,6 @@ const StyledTh = styled.th<{
   max-height: 40px;
   ${({ isNowDragged }) => (isNowDragged ? nowDraggedCss : "")};
   ${({ isDragging }) => (isDragging ? nowDraggingCss : "")};
-
 `;
 const StyledTd = styled.td<{
   isNowTarget?: boolean;
