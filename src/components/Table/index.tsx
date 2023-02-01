@@ -373,7 +373,7 @@ const Table = <T,>({
         const targetEle = newData[targetRowIndex];
 
         newData[targetRowIndex - 1] = targetEle;
-        newData[targetRowIndex] = dragEle;
+        newData[targetRowIndex] = draggingRowIndex.ele;
       } else if (targetRowIndex < draggingRowIndex) {
       }
 
