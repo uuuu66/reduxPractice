@@ -18,10 +18,24 @@ interface Data {
 }
 
 const columns: TableColumn[] = [
-  { key: "name", width: 200, name: "이름", index: "name", resizable: true },
+  {
+    key: "name",
+    width: 100,
+    name: "이름이름이름이름이름",
+    index: "name",
+    resizable: true,
+    headerEllipsis: true,
+  },
 
-  { key: "age", width: 200, name: "나이", index: "age" },
-  { key: "phone", width: 200, name: "휴대폰 번호", index: "phone" },
+  { key: "age", width: 200, name: "나이", index: "age", headerEllipsis: true },
+  {
+    key: "phone",
+    width: 200,
+    name: "휴대폰",
+    index: "phone",
+    resizable: true,
+    headerEllipsis: true,
+  },
 ];
 
 const mockData: Data[] = [

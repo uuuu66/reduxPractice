@@ -2,6 +2,23 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { colors } from "@/styles/colors";
 
+export interface TableOptions {
+  tableWidth?: number;
+  tableHeight?: number;
+  colors?: {
+    headerCell?: string;
+    bodyCell?: string;
+    cellBorder?: string;
+  };
+}
+const options: TableOptions = {
+  tableWidth: 100,
+  tableHeight: 100,
+  colors: {
+    headerCell: "red",
+  },
+};
+
 export interface TableColumn {
   key: string | number;
   name: string | ReactNode;
@@ -9,6 +26,8 @@ export interface TableColumn {
   width: number;
   render?: (value: unknown, row: unknown) => ReactNode;
   resizable?: boolean;
+  headerEllipsis?: boolean;
+  bodyEllipsis?: boolean;
 }
 export interface DragColFunctionOptions {
   newColumns?: TableColumn[];
@@ -89,7 +108,7 @@ const Table = <T,>({
 
   let clickResizePosX = -1;
   let clickResizeIndex = -1;
-  let TABLE_COLUMN_MIN_WIDTH = 100;
+  let TABLE_COLUMN_MIN_WIDTH = 50;
   // 리사이즈 시작입니당
 
   /**
@@ -282,19 +301,18 @@ const Table = <T,>({
     const colgroupList: JSX.Element[] = [];
     const theadList: JSX.Element[] = [];
     if (isRenderHandle) {
-      colgroupList.push(<col width={40}></col>);
+      colgroupList.push(<col width={40} />);
       theadList.push(<StyledDraggedRowTh />);
     }
     for (let i = 0; i < columns.length; i++) {
-      const isNowTarget = columns[i].index === targetColIndex;
-      colgroupList.push(
-        <col key={columns[i].key + "column"} width={columns[i].width}></col>
-      );
+      const { index, width, key, headerEllipsis = false } = columns[i];
+      const isNowTarget = index === targetColIndex;
+      colgroupList.push(<col key={columns[i].key + "column"} width={width} />);
       theadList.push(
         <StyledTh
           isDraggableCol={isDraggableCol}
           isDragging={isDraggingCol || isDraggingRow}
-          isNowDragged={draggingColIndex === columns[i].index}
+          isNowDragged={draggingColIndex === index}
           isNowTarget={isNowTarget}
           onMouseDown={(e) => {
             handleMouseDownSwitchTh(e, columns, i);
@@ -302,17 +320,20 @@ const Table = <T,>({
           onMouseMove={(e) => {
             handleMouseMoveSwitchTh(e, columns, i);
           }}
-          key={columns[i].key + String(i) + "th"}
+          isEllipsis={headerEllipsis}
+          key={key + String(i) + "th"}
         >
           {columns[i].name}
-          {columns[i].resizable && (
-            <ResizeHandle onMouseDown={(e) => handleMouseDownResize(e, i)}>
-              |
-            </ResizeHandle>
+          {columns[i].resizable ? (
+            <ResizeHandle onMouseDown={(e) => handleMouseDownResize(e, i)} />
+          ) : (
+            <TrDivider />
           )}
         </StyledTh>
       );
     }
+    colgroupList.push(<col width="100%" />);
+    theadList.push(<StyledTh></StyledTh>);
     return (
       <>
         <colgroup>{colgroupList}</colgroup>
@@ -346,13 +367,14 @@ const Table = <T,>({
       }
 
       for (let j = 0; j < columns.length; j++) {
-        const { index, render } = columns[j];
+        const { index, render, bodyEllipsis = false } = columns[j];
 
         items.push(
           <StyledTd
             isNowDragged={index === draggingColIndex || i === draggingRowIndex}
             isNowTarget={index === targetColIndex || i === targetRowIndex}
             isDragging={isDraggingCol || isDraggingRow}
+            isEllipsis={bodyEllipsis}
             key={i + item[index] + item[tableKey] + "Tdr" + j}
           >
             {item[index]}
@@ -439,11 +461,14 @@ const Table = <T,>({
             <tbody>
               <tr>
                 {nowColumns.map((val, i) => {
+                  const { bodyEllipsis = false } = val;
                   const item = data[draggingRowIndex] as { [key: string]: any };
                   const index = val.index;
-
                   return (
-                    <StyledTd key={item.id + item[tableKey] + "dragged+" + i}>
+                    <StyledTd
+                      key={item.id + item[tableKey] + "dragged+" + i}
+                      isEllipsis={bodyEllipsis}
+                    >
                       {item[index]}
                     </StyledTd>
                   );
@@ -470,12 +495,17 @@ const StyledTh = styled.th<{
   isNowDragged?: boolean;
   isDraggableCol?: boolean;
   isDragging?: boolean;
+  isEllipsis?: boolean;
 }>`
   position: relative;
-  cursor: ${({ isDraggableCol }) => (!isDraggableCol ? "default" : "move")};
-
-  border: 1px solid black;
   max-height: 40px;
+  ${({ isEllipsis }) =>
+    isEllipsis &&
+    css`
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    `}
   ${({ isNowDragged }) => (isNowDragged ? nowDraggedCss : "")};
   ${({ isDragging }) => (isDragging ? nowDraggingCss : "")};
 `;
@@ -483,9 +513,16 @@ const StyledTd = styled.td<{
   isNowTarget?: boolean;
   isNowDragged?: boolean;
   isDragging?: boolean;
+  isEllipsis: boolean;
 }>`
+  ${({ isEllipsis }) =>
+    isEllipsis &&
+    css`
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    `}
   ${({ isNowTarget }) => (isNowTarget ? nowDraggedCss : "")};
-
   ${({ isDragging }) => (isDragging ? nowDraggingCss : "")};
 `;
 
@@ -508,11 +545,9 @@ const nowDraggingCss = css`
 `;
 const StyledDraggedTh = styled.th`
   height: 40px;
-  border: 1px solid black;
 `;
 const StyledDraggedRowTh = styled.th`
   height: 40px;
-  border: 1px solid black;
 `;
 const StyledDraggedRowHandle = styled.td`
   cursor: move;
@@ -531,10 +566,8 @@ const StyledDraggedTable = styled.table<{
   thead > tr {
     height: 40px;
     background-color: ${colors.G7};
-    border: 2px solid black;
   }
   td {
-    border: 1px solid black;
     max-height: 40px;
     height: 40px;
   }
@@ -542,6 +575,8 @@ const StyledDraggedTable = styled.table<{
 const StyledTable = styled.table`
   border-spacing: 0;
   padding: 0 0;
+  table-layout: fixed;
+  width: 100%;
   thead {
     padding: 0 0;
     border-spacing: 0;
@@ -551,26 +586,36 @@ const StyledTable = styled.table`
   th {
     padding: 0 0;
     border-spacing: 0;
-
     text-align: center;
+    padding: 0 4px;
   }
   thead > tr {
     height: 40px;
     background-color: ${colors.G7};
-    border: 2px solid black;
   }
   td {
-    border: 1px solid black;
     max-height: 40px;
     height: 40px;
   }
 `;
-const ResizeHandle = styled.div`
-  width: 20px;
+const TrDivider = styled.div`
+  width: 3px;
+  height: 60%;
   position: absolute;
-  right: 20px;
-  top: 2px;
-  background-color: red;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: ${colors.G4};
+  z-index: 20;
+`;
+const ResizeHandle = styled.div`
+  width: 3px;
+  height: 60%;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: ${colors.G4};
   cursor: pointer;
   z-index: 20;
 `;
