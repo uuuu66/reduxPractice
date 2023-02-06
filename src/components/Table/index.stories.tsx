@@ -35,6 +35,7 @@ const columns: TableColumn[] = [
     index: "phone",
     resizable: true,
     headerEllipsis: true,
+    bodyEllipsis: true,
   },
 ];
 

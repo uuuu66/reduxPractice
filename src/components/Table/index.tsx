@@ -6,18 +6,13 @@ export interface TableOptions {
   tableWidth?: number;
   tableHeight?: number;
   colors?: {
-    headerCell?: string;
-    bodyCell?: string;
-    cellBorder?: string;
+    headerRow?: string;
+    bodyRow?: string;
+    bodyRowHoder?: string;
+    rowBorder?: string;
+    resizeHandler?: string;
   };
 }
-const options: TableOptions = {
-  tableWidth: 100,
-  tableHeight: 100,
-  colors: {
-    headerCell: "red",
-  },
-};
 
 export interface TableColumn {
   key: string | number;
@@ -49,6 +44,7 @@ interface Props<T> {
   data: T[];
   columns: TableColumn[];
   tableKey: string;
+  options?: TableOptions;
   setData?: (e: T[]) => void;
   setColumns?: (e: TableColumn[]) => void;
   dragColStartFunction: (
@@ -79,11 +75,18 @@ interface Props<T> {
   isDraggableRow?: boolean | IsDraggableRowOptions;
 }
 
+const DEFAULT_HEADER_CELL_COLOR = "#c4c4c4";
+const DEFAULT_BODY_ROW_COLOR = "";
+const DEFAULT_BODY_ROW_HOVER_COLOR = "#a3a3a3";
+const DEFAULT_CELL_BORDER_COLOR = "";
+const DEFAULT_RESIZE_HANDLER_COLOR = "";
+
 const Table = <T,>({
   data,
   columns,
   tableKey,
   setData,
+  options,
   setColumns,
   draggingColFunction,
   dragColStartFunction,
@@ -344,6 +347,7 @@ const Table = <T,>({
     );
   };
   const renderBody = <T,>(data: T[], columns: TableColumn[]): JSX.Element => {
+    const { colors = {} } = options ?? {};
     const body: JSX.Element[] = [];
     for (let i = 0; i < data.length; i++) {
       const item = data[i] as { [key: string]: any };
@@ -382,7 +386,9 @@ const Table = <T,>({
         );
       }
       body.push(
-        <tr
+        <TableBodyRow
+          rowColor={colors?.bodyRow}
+          rowHoverColor={colors?.bodyRow}
           onMouseDown={(e) => {
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
               handleMouseDownSwitchTbody(e, i);
@@ -394,7 +400,7 @@ const Table = <T,>({
           key={item["id"] + "tr" + i}
         >
           {items}
-        </tr>
+        </TableBodyRow>
       );
     }
     return <tbody>{body}</tbody>;
@@ -424,7 +430,7 @@ const Table = <T,>({
   }, [draggingColIndex, targetColIndex]);
 
   return (
-    <>
+    <TableWrap>
       {(isDraggableCol || isMoveableRow) && (
         <StyledDraggedTable
           border={1}
@@ -478,18 +484,21 @@ const Table = <T,>({
           )}
         </StyledDraggedTable>
       )}
-      <div>
-        <StyledTable>
-          {renderHead(nowColumns)}
-          {renderBody(nowData, nowColumns)}
-        </StyledTable>
-      </div>
-    </>
+      <StyledTable>
+        {renderHead(nowColumns)}
+        {renderBody(nowData, nowColumns)}
+      </StyledTable>
+    </TableWrap>
   );
 };
 
 export default Table;
 
+const TableWrap = styled.div<{ tableWidth?: number; tableHeight?: number }>`
+  width: ${({ tableWidth }) => (tableWidth ? `${tableWidth}px` : "100%")};
+  height: ${({ tableHeight }) => (tableHeight ? `${tableHeight}px` : "auto")};
+  overflow: auto;
+`;
 const StyledTh = styled.th<{
   isNowTarget?: boolean;
   isNowDragged?: boolean;
@@ -618,4 +627,11 @@ const ResizeHandle = styled.div`
   background-color: ${colors.G4};
   cursor: pointer;
   z-index: 20;
+`;
+const TableBodyRow = styled.tr<{ rowColor?: string; rowHoverColor?: string }>`
+  background-color: ${({ rowColor }) => rowColor || DEFAULT_BODY_ROW_COLOR};
+  &:hover {
+    background-color: ${({ rowHoverColor }) =>
+      rowHoverColor || DEFAULT_BODY_ROW_HOVER_COLOR};
+  }
 `;
