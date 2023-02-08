@@ -59,6 +59,15 @@ interface Props<T> {
   isDraggableCol?: boolean;
   isDraggableRow?: boolean | IsDraggableRowOptions;
   rowDragHandleClassName?: string;
+  dragColEndFunction?: (
+    e?: React.MouseEvent,
+    options?: DragColFunctionOptions
+  ) => void;
+
+  dragRowEndFunction?: (
+    e?: React.MouseEvent,
+    options?: DragRowFunctionOptions<T>
+  ) => void;
 }
 
 const Table = <T,>({
@@ -69,9 +78,9 @@ const Table = <T,>({
   setColumns,
   draggingColFunction,
   dragColStartFunction,
-
+  dragColEndFunction,
   dragRowStartFunction,
-
+  dragRowEndFunction,
   draggingRowFunction,
   isDraggableCol = true,
   isDraggableRow = { value: false, isRenderHandle: true },
@@ -187,8 +196,24 @@ const Table = <T,>({
         });
     }
   };
-  const handleDragOver = (e: React.MouseEvent) => {
+  const handleDragOver = (
+    e: React.MouseEvent,
+    i: number,
+    type: "COL" | "ROW"
+  ) => {
     e.preventDefault();
+    if (dragColEndFunction && type === "COL")
+      dragColEndFunction(e, {
+        draggingIndex: nowColumns[i].index,
+        mouseXy: [e.clientX, e.clientY],
+        newColumns: nowColumns,
+      });
+    if (dragRowEndFunction && type === "ROW")
+      dragRowEndFunction(e, {
+        draggingData: nowData[i],
+        mouseXy: [e.clientX, e.clientY],
+        newData: nowData,
+      });
   };
   const renderHead = (columns: TableColumn[]): JSX.Element => {
     const colgroupList: JSX.Element[] = [];
