@@ -235,7 +235,9 @@ const Table = <T,>({
           onDragEnter={(e) => {
             handleDragEnterTColumn(e, i);
           }}
-          onDragOver={handleDragOver}
+          onDragOver={(e) => {
+            handleDragOver(e, i, "COL");
+          }}
           isDraggableCol={isDraggableCol}
           // onMouseDown={(e) => {
           //   handleDragStartTColumn(e, i);
@@ -322,11 +324,12 @@ const Table = <T,>({
                   (handleRef.current?.clientWidth || 0) &&
               e.clientX >= (handleRef.current?.clientLeft || 0)
             ) {
-              console.log(e, i, "s");
               handleDragEnterTbody(e, i);
             }
           }}
-          onDragOver={handleDragOver}
+          onDragOver={(e) => {
+            handleDragOver(e, i, "ROW");
+          }}
           key={item["id"] + "tr" + i}
         >
           {items}
