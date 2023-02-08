@@ -19,8 +19,8 @@ export interface TableColumn {
 export interface DragColFunctionOptions {
   newColumns?: TableColumn[];
   mouseXy?: number[];
-  targetColIndex?: string;
-  draggingColIndex?: string;
+
+  draggingIndex?: string;
 }
 export interface DragRowFunctionOptions<T> {
   newData?: T[];
@@ -42,10 +42,7 @@ interface Props<T> {
     e?: React.MouseEvent,
     options?: DragColFunctionOptions
   ) => void;
-  dragColEndFunction?: (
-    e?: MouseEvent,
-    options?: DragColFunctionOptions
-  ) => void;
+
   draggingColFunction?: (
     e?: React.MouseEvent,
     options?: DragColFunctionOptions
@@ -54,10 +51,7 @@ interface Props<T> {
     e?: React.MouseEvent,
     options?: DragRowFunctionOptions<T>
   ) => void;
-  dragRowEndFunction?: (
-    e?: MouseEvent,
-    options?: DragRowFunctionOptions<T>
-  ) => void;
+
   draggingRowFunction?: (
     e?: React.MouseEvent,
     options?: DragRowFunctionOptions<T>
@@ -75,25 +69,21 @@ const Table = <T,>({
   setColumns,
   draggingColFunction,
   dragColStartFunction,
-  dragColEndFunction,
+
   dragRowStartFunction,
-  dragRowEndFunction,
+
   draggingRowFunction,
   isDraggableCol = true,
   isDraggableRow = { value: false, isRenderHandle: true },
   rowDragHandleClassName = "row-handle",
 }: Props<T>) => {
   //드래그 관련
-  const defaultXy = [0, 0];
+
   const [nowData, setNowData] = useState<T[]>(data);
 
   const [nowColumns, setNowColumns] = useState<TableColumn[]>([...columns]);
-  const [draggingColIndex, setDraggingHeadIndex] = useState<string>();
-
-  const [targetColIndex, setTargetColIndex] = useState<string>();
 
   const handleRef = useRef<HTMLTableCellElement>(null);
-  const [mouseXy, setMouseXy] = useState<number[]>(defaultXy);
 
   let element = null;
   let clickPosX = 0;
@@ -119,7 +109,6 @@ const Table = <T,>({
   };
   // 리사이즈 여기까징
 
-  const isDraggingCol = draggingColIndex !== undefined;
   const isMoveableRow =
     isDraggableRow === true ||
     (isDraggableRow as IsDraggableRowOptions).value === true;
@@ -127,111 +116,47 @@ const Table = <T,>({
     isMoveableRow &&
     (isDraggableRow as IsDraggableRowOptions).isRenderHandle === true;
 
-  const handleMouseDownSwitchTh = (
-    e: React.MouseEvent,
-    columns: TableColumn[],
-    i: number
-  ) => {
-    if (isDraggableCol)
-      if (isDraggingCol) {
-        setTargetColIndex(undefined);
-        setDraggingHeadIndex(undefined);
-      } else {
-        setTargetColIndex(columns[i].index);
-        setDraggingHeadIndex(columns[i].index);
-        setMouseXy([e.clientX, e.clientY + 30]);
-        if (dragColStartFunction)
-          dragColStartFunction(e, {
-            targetColIndex,
-            draggingColIndex,
-            mouseXy,
-            newColumns: nowColumns,
-          });
-      }
+  const handleDragStartTColumn = (e: React.MouseEvent, i: number) => {
+    if (isDraggableCol) {
+      draggingItem.current = i;
+      if (dragColStartFunction)
+        dragColStartFunction(e, {
+          draggingIndex: nowColumns[i].index,
+          mouseXy: [e.clientX, e.clientY],
+          newColumns: nowColumns,
+        });
+    }
   };
-  const handleMouseMoveSwitchTh = (
-    e: React.MouseEvent,
-    columns: TableColumn[],
-    i: number
-  ) => {
-    if (isDraggableCol)
-      if (isDraggingCol) {
-        setMouseXy([e.clientX, e.clientY + 30]);
-        const newColumns = [...nowColumns];
-        const nowTargetArrayIndex = newColumns.findIndex(
-          (val) => val.index === columns[i].index
-        );
-        const nowDraggingArrayIndex = newColumns.findIndex(
-          (val) => val.index === draggingColIndex
-        );
-        const nowTargetEle = newColumns[nowTargetArrayIndex];
-        const nowDraggingEle = newColumns[nowDraggingArrayIndex];
-        newColumns[nowDraggingArrayIndex] = nowTargetEle;
-        newColumns[nowTargetArrayIndex] = nowDraggingEle;
-        setTargetColIndex(columns[i].index);
-        if (setColumns) {
-          setColumns(newColumns);
-        } else {
-          setNowColumns(newColumns);
-        }
-        if (draggingColFunction)
-          draggingColFunction(e, {
-            targetColIndex,
-            draggingColIndex,
-            mouseXy,
-            newColumns: nowColumns,
-          });
-      }
+  const handleDragEnterTColumn = (e: React.MouseEvent, i: number) => {
+    if (isDraggableCol && draggingItem.current !== undefined) {
+      dragOverItem.current = i;
+      const copyData = [...nowColumns];
+      const draggingData = copyData[draggingItem.current];
+      copyData.splice(draggingItem.current, 1);
+
+      copyData.splice(dragOverItem.current, 0, draggingData);
+
+      draggingItem.current = i;
+      dragOverItem.current = undefined;
+
+      if (setColumns) setColumns(copyData);
+      else setNowColumns(copyData);
+      if (draggingColFunction)
+        draggingColFunction(e, {
+          draggingIndex: draggingData.index,
+          mouseXy: [e.clientX, e.clientY],
+          newColumns: copyData,
+        });
+    }
   };
-  const handleMouseUpSwitchTh = useCallback(
-    (e: MouseEvent) => {
-      if (isDraggableCol) {
-        if (targetColIndex !== draggingColIndex) {
-          const newColumns = [...nowColumns];
-          const nowTargetArrayIndex = newColumns.findIndex(
-            (val) => val.index === targetColIndex
-          );
-          const nowDraggingArrayIndex = newColumns.findIndex(
-            (val) => val.index === draggingColIndex
-          );
-          const nowTargetEle = newColumns[nowTargetArrayIndex];
-          const nowDraggingEle = newColumns[nowDraggingArrayIndex];
-          newColumns[nowDraggingArrayIndex] = nowTargetEle;
-          newColumns[nowTargetArrayIndex] = nowDraggingEle;
-          if (setColumns) {
-            setColumns(newColumns);
-          } else {
-            setNowColumns(newColumns);
-          }
-          if (dragColEndFunction)
-            dragColEndFunction(e, {
-              targetColIndex,
-              draggingColIndex,
-              mouseXy,
-              newColumns,
-            });
-        }
-        setDraggingHeadIndex(undefined);
-        setTargetColIndex(undefined);
-      }
-    },
-    [
-      dragColEndFunction,
-      draggingColIndex,
-      isDraggableCol,
-      mouseXy,
-      nowColumns,
-      setColumns,
-      targetColIndex,
-    ]
-  );
+
   const handleDragStartTbody = (e: React.MouseEvent, i: number) => {
     if (isDraggableRow) {
       draggingItem.current = i;
       if (dragRowStartFunction)
         dragRowStartFunction(e, {
           draggingData: nowData[i],
-          mouseXy,
+          mouseXy: [e.clientX, e.clientY],
           newData: nowData,
         });
     }
@@ -241,16 +166,14 @@ const Table = <T,>({
 
     i: number
   ) => {
-    console.log(draggingItem.current);
     if (isDraggableRow && draggingItem.current !== undefined) {
-      console.log(i);
       dragOverItem.current = i;
       const copyData = [...nowData];
       const draggingData = copyData[draggingItem.current];
       copyData.splice(draggingItem.current, 1);
-      console.log(copyData, "hi");
+
       copyData.splice(dragOverItem.current, 0, draggingData);
-      console.log(copyData, "h2");
+
       draggingItem.current = i;
       dragOverItem.current = undefined;
 
@@ -259,12 +182,12 @@ const Table = <T,>({
       if (draggingRowFunction)
         draggingRowFunction(e, {
           draggingData,
-          mouseXy,
+          mouseXy: [e.clientX, e.clientY],
           newData: nowData,
         });
     }
   };
-  const handleDragOverTbody = (e: React.MouseEvent) => {
+  const handleDragOver = (e: React.MouseEvent) => {
     e.preventDefault();
   };
   const renderHead = (columns: TableColumn[]): JSX.Element => {
@@ -275,42 +198,50 @@ const Table = <T,>({
       theadList.push(<StyledDraggedRowTh />);
     }
     for (let i = 0; i < columns.length; i++) {
-      const isNowTarget = columns[i].index === targetColIndex;
       colgroupList.push(
         <col key={columns[i].key + "column"} width={columns[i].width}></col>
       );
       theadList.push(
         <StyledTh
+          draggable
+          onDragStart={(e) => {
+            handleDragStartTColumn(e, i);
+          }}
+          onDragEnter={(e) => {
+            handleDragEnterTColumn(e, i);
+          }}
+          onDragOver={handleDragOver}
           isDraggableCol={isDraggableCol}
-          isDragging={isDraggingCol}
-          isNowDragged={draggingColIndex === columns[i].index}
-          isNowTarget={isNowTarget}
-          onMouseDown={(e) => {
-            handleMouseDownSwitchTh(e, columns, i);
-          }}
+          // onMouseDown={(e) => {
+          //   handleDragStartTColumn(e, i);
+          // }}
           onClick={(e) => console.log(e.currentTarget.offsetWidth)}
-          onMouseMove={(e) => {
-            handleMouseMoveSwitchTh(e, columns, i);
-          }}
+          // onMouseMove={(e) => {
+          //   handleDragEnterTColumn(e, i);
+          // }}
+          // onMouseUp={() => {
+          //   draggingItem.current = undefined;
+          //   dragOverItem.current = undefined;
+          // }}
           key={columns[i].key + String(i) + "th"}
         >
           {columns[i].name}
-          {columns[i].resizable && (
+          {/* {columns[i].resizable && (
             <ResizeHandle
               onMouseDown={handleMouseDownResize}
               onMouseUp={() => console.log("good")}
             >
               |
             </ResizeHandle>
-          )}
+          )} */}
         </StyledTh>
       );
     }
     return (
       <>
         <colgroup>{colgroupList}</colgroup>
-        <thead>
-          <tr>{theadList}</tr>
+        <thead draggable={false}>
+          <tr draggable={false}>{theadList}</tr>
         </thead>
       </>
     );
@@ -336,12 +267,7 @@ const Table = <T,>({
         const { index, render } = columns[j];
 
         items.push(
-          <StyledTd
-            isNowDragged={index === draggingColIndex}
-            isNowTarget={index === targetColIndex}
-            isDragging={isDraggingCol}
-            key={i + item[index] + item[tableKey] + "Tdr" + j}
-          >
+          <StyledTd key={i + item[index] + item[tableKey] + "Tdr" + j}>
             {item[index]}
           </StyledTd>
         );
@@ -351,12 +277,6 @@ const Table = <T,>({
         <tr
           draggable
           onDragStart={(e) => {
-            console.log(
-              e.clientX,
-              (handleRef.current?.clientLeft || 0) +
-                (handleRef.current?.clientWidth || 0),
-              handleRef.current?.clientLeft || 0
-            );
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
               handleDragStartTbody(e, i);
             else if (
@@ -381,7 +301,7 @@ const Table = <T,>({
               handleDragEnterTbody(e, i);
             }
           }}
-          onDragOver={handleDragOverTbody}
+          onDragOver={handleDragOver}
           key={item["id"] + "tr" + i}
         >
           {items}
@@ -390,53 +310,11 @@ const Table = <T,>({
     }
     return <tbody>{body}</tbody>;
   };
-  const handleMouseUp = useCallback(
-    (e: MouseEvent) => {
-      handleMouseUpSwitchTh(e);
-    },
-    [handleMouseUpSwitchTh]
-  );
-
-  useEffect(() => {
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => window.removeEventListener("mouseup", handleMouseUp);
-  }, [handleMouseUp]);
 
   return (
     <>
-      {(isDraggableCol || isMoveableRow) && (
-        <StyledDraggedTable
-          border={1}
-          isDragged={isDraggingCol}
-          mouseXy={mouseXy}
-        >
-          <colgroup>
-            {isDraggingCol && (
-              <col
-                width={
-                  nowColumns.find((val) => val.index === draggingColIndex)
-                    ?.width
-                }
-              ></col>
-            )}
-          </colgroup>
-          {isDraggingCol && (
-            <thead>
-              <tr>
-                <StyledDraggedTh>
-                  {
-                    nowColumns.find((val) => val.index === draggingColIndex)
-                      ?.name
-                  }
-                </StyledDraggedTh>
-              </tr>
-            </thead>
-          )}
-        </StyledDraggedTable>
-      )}
       <div>
-        <StyledTable>
+        <StyledTable draggable={false}>
           {renderHead(nowColumns)}
           {renderBody(nowData, nowColumns)}
         </StyledTable>

@@ -45,7 +45,7 @@ for (let i = 0; i < 10; i += 1) {
 const Template: ComponentStory<typeof Table> = (args) => (
   <Table
     {...args}
-    isDraggableRow={{ isRenderHandle: true, value: true }}
+    isDraggableRow={{ isRenderHandle: false, value: true }}
     isDraggableCol={true}
     data={data}
     columns={columns}
