@@ -142,12 +142,9 @@ const Table = <T,>({
       const copyData = [...nowColumns];
       const draggingData = copyData[draggingItem.current];
       copyData.splice(draggingItem.current, 1);
-
       copyData.splice(dragOverItem.current, 0, draggingData);
-
       draggingItem.current = i;
       dragOverItem.current = undefined;
-
       if (setColumns) setColumns(copyData);
       else setNowColumns(copyData);
       if (draggingColFunction)
@@ -360,7 +357,7 @@ const StyledTh = styled.th<{
   isDragging?: boolean;
 }>`
   cursor: ${({ isDraggableCol }) => (!isDraggableCol ? "default" : "move")};
-
+  /* -webkit-user-drag: none; */
   border: 1px solid black;
   max-height: 40px;
   ${({ isNowDragged }) => (isNowDragged ? nowDraggedCss : "")};
@@ -393,10 +390,7 @@ const nowDraggingCss = css`
   -webkit-user-select: none;
   user-select: none;
 `;
-const StyledDraggedTh = styled.th`
-  height: 40px;
-  border: 1px solid black;
-`;
+
 const StyledDraggedRowTh = styled.th`
   height: 40px;
   border: 1px solid black;
@@ -404,27 +398,6 @@ const StyledDraggedRowTh = styled.th`
 const StyledDraggedRowHandle = styled.td`
   cursor: move;
   ${nowDraggingCss};
-`;
-
-const StyledDraggedTable = styled.table<{
-  isDragged?: boolean;
-  mouseXy?: number[];
-}>`
-  position: fixed;
-  left: ${({ mouseXy }) => (mouseXy ? mouseXy[0] || 0 : 0)}px;
-  top: ${({ mouseXy }) => (mouseXy ? mouseXy[1] || 0 : 0)}px;
-  display: ${({ isDragged }) => (isDragged ? "default" : "none")};
-  background-color: white;
-  thead > tr {
-    height: 40px;
-    background-color: ${colors.G7};
-    border: 2px solid black;
-  }
-  td {
-    border: 1px solid black;
-    max-height: 40px;
-    height: 40px;
-  }
 `;
 const StyledTable = styled.table`
   border-spacing: 0;
@@ -451,13 +424,4 @@ const StyledTable = styled.table`
     max-height: 40px;
     height: 40px;
   }
-`;
-const ResizeHandle = styled.div`
-  width: 20px;
-  position: absolute;
-  right: 20px;
-  top: 2px;
-  background-color: red;
-  cursor: pointer;
-  z-index: 20;
 `;
