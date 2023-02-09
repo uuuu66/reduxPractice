@@ -98,8 +98,11 @@ const Table = <T,>({
   let clickPosX = 0;
   let event;
 
-  const draggingItem = useRef<number>();
-  const dragOverItem = useRef<number>();
+  const draggingItemCol = useRef<number>();
+  const draggingItemRow = useRef<number>();
+
+  const dragOverItemCol = useRef<number>();
+  const dragOverItemRow = useRef<number>();
   // 리사이즈 시작입니당
   const handleMouseMoveResize = (e: MouseEvent) => {
     console.log(e.pageX);
@@ -125,9 +128,9 @@ const Table = <T,>({
     isMoveableRow &&
     (isDraggableRow as IsDraggableRowOptions).isRenderHandle === true;
 
-  const handleDragStartTColumn = (e: React.MouseEvent, i: number) => {
+  const handleDragStartCol = (e: React.MouseEvent, i: number) => {
     if (isDraggableCol) {
-      draggingItem.current = i;
+      draggingItemCol.current = i;
       if (dragColStartFunction)
         dragColStartFunction(e, {
           draggingIndex: nowColumns[i].index,
@@ -136,15 +139,15 @@ const Table = <T,>({
         });
     }
   };
-  const handleDragEnterTColumn = (e: React.MouseEvent, i: number) => {
-    if (isDraggableCol && draggingItem.current !== undefined) {
-      dragOverItem.current = i;
+  const handleDragEnterCol = (e: React.MouseEvent, i: number) => {
+    if (isDraggableCol && draggingItemCol.current !== undefined) {
+      dragOverItemCol.current = i;
       const copyData = [...nowColumns];
-      const draggingData = copyData[draggingItem.current];
-      copyData.splice(draggingItem.current, 1);
-      copyData.splice(dragOverItem.current, 0, draggingData);
-      draggingItem.current = i;
-      dragOverItem.current = undefined;
+      const draggingData = copyData[draggingItemCol.current];
+      copyData.splice(draggingItemCol.current, 1);
+      copyData.splice(draggingItemCol.current, 0, draggingData);
+      draggingItemCol.current = i;
+      dragOverItemCol.current = undefined;
       if (setColumns) setColumns(copyData);
       else setNowColumns(copyData);
       if (draggingColFunction)
@@ -156,9 +159,9 @@ const Table = <T,>({
     }
   };
 
-  const handleDragStartTbody = (e: React.MouseEvent, i: number) => {
+  const handleDragStartRow = (e: React.MouseEvent, i: number) => {
     if (isDraggableRow) {
-      draggingItem.current = i;
+      draggingItemRow.current = i;
       if (dragRowStartFunction)
         dragRowStartFunction(e, {
           draggingData: nowData[i],
@@ -167,21 +170,21 @@ const Table = <T,>({
         });
     }
   };
-  const handleDragEnterTbody = (
+  const handleDragEnterRow = (
     e: React.MouseEvent,
 
     i: number
   ) => {
-    if (isDraggableRow && draggingItem.current !== undefined) {
-      dragOverItem.current = i;
+    if (isDraggableRow && draggingItemRow.current !== undefined) {
+      dragOverItemRow.current = i;
       const copyData = [...nowData];
-      const draggingData = copyData[draggingItem.current];
-      copyData.splice(draggingItem.current, 1);
+      const draggingData = copyData[draggingItemRow.current];
+      copyData.splice(draggingItemRow.current, 1);
 
-      copyData.splice(dragOverItem.current, 0, draggingData);
+      copyData.splice(dragOverItemRow.current, 0, draggingData);
 
-      draggingItem.current = i;
-      dragOverItem.current = undefined;
+      draggingItemRow.current = i;
+      dragOverItemRow.current = undefined;
 
       if (setData) setData(copyData);
       else setNowData(copyData);
@@ -227,21 +230,21 @@ const Table = <T,>({
         <StyledTh
           draggable
           onDragStart={(e) => {
-            handleDragStartTColumn(e, i);
+            handleDragStartCol(e, i);
           }}
           onDragEnter={(e) => {
-            handleDragEnterTColumn(e, i);
+            handleDragEnterCol(e, i);
           }}
           onDragOver={(e) => {
             handleDragOver(e, i, "COL");
           }}
           isDraggableCol={isDraggableCol}
           // onMouseDown={(e) => {
-          //   handleDragStartTColumn(e, i);
+          //   handleDragStartCol(e, i);
           // }}
           onClick={(e) => console.log(e.currentTarget.offsetWidth)}
           // onMouseMove={(e) => {
-          //   handleDragEnterTColumn(e, i);
+          //   handleDragEnterCol(e, i);
           // }}
           // onMouseUp={() => {
           //   draggingItem.current = undefined;
@@ -302,26 +305,26 @@ const Table = <T,>({
           draggable
           onDragStart={(e) => {
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-              handleDragStartTbody(e, i);
+              handleDragStartRow(e, i);
             else if (
               e.clientX <=
                 (handleRef.current?.clientLeft || 0) +
                   (handleRef.current?.clientWidth || 0) &&
               e.clientX >= (handleRef.current?.clientLeft || 0)
             ) {
-              handleDragStartTbody(e, i);
+              handleDragStartRow(e, i);
             }
           }}
           onDragEnter={(e) => {
             if (!(isDraggableRow as IsDraggableRowOptions)?.isRenderHandle)
-              handleDragEnterTbody(e, i);
+              handleDragEnterRow(e, i);
             else if (
               e.clientX <=
                 (handleRef.current?.clientLeft || 0) +
                   (handleRef.current?.clientWidth || 0) &&
               e.clientX >= (handleRef.current?.clientLeft || 0)
             ) {
-              handleDragEnterTbody(e, i);
+              handleDragEnterRow(e, i);
             }
           }}
           onDragOver={(e) => {
