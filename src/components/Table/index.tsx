@@ -145,7 +145,7 @@ const Table = <T,>({
       const copyData = [...nowColumns];
       const draggingData = copyData[draggingItemCol.current];
       copyData.splice(draggingItemCol.current, 1);
-      copyData.splice(draggingItemCol.current, 0, draggingData);
+      copyData.splice(dragOverItemCol.current, 0, draggingData);
       draggingItemCol.current = i;
       dragOverItemCol.current = undefined;
       if (setColumns) setColumns(copyData);
@@ -273,6 +273,7 @@ const Table = <T,>({
       </>
     );
   };
+
   const renderBody = <T,>(data: T[], columns: TableColumn[]): JSX.Element => {
     const body: JSX.Element[] = [];
     for (let i = 0; i < data.length; i++) {
